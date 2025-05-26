@@ -5,12 +5,7 @@ pragma solidity 0.8.30;
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 contract Airdrop is Ownable2Step {
-
-    constructor() Ownable(msg.sender){
-
-        
-    }
-
+    constructor() Ownable(msg.sender) {}
 
     /* request - Chainlink VRF
 
