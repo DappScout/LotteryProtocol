@@ -2,17 +2,12 @@
 
 pragma solidity 0.8.30;
 
-/*//////////////////////////////////////////////////////////////
-                        IMPORTS
-///////////////////////////////////////////////////////////////*/
+import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
+import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "./libs/Events.sol";
 
-/*//////////////////////////////////////////////////////////////
-                  CONTRACT DECLARATION
-///////////////////////////////////////////////////////////////*/
-contract Airdrop is ReentrancyGuard {
+contract Airdrop is VRFConsumerBaseV2Plus, ReentrancyGuard {
     /*//////////////////////////////////////////////////////////////
                         TYPE DECLARATIONS
     ///////////////////////////////////////////////////////////////*/
@@ -41,13 +36,18 @@ contract Airdrop is ReentrancyGuard {
     /*//////////////////////////////////////////////////////////////
                         STATE VARIABLES
     ///////////////////////////////////////////////////////////////*/
-    uint256 private immutable entranceFee;
-    uint256 private immutable amountOfParticipantsPerLottery;
+    uint32 private constant NUM_WORDS = 1;
+    uint16 private constant REQUEST_CONFIRMATIONS = 3;
+
+    uint256 private immutable i_entranceFee;
+    uint256 private immutable i_amountOfParticipantsPerLottery;
+    uint256 private immutable i_subId;
+    bytes32 private immutable i_keyHash;
+    uint32 private immutable i_callbackGasLimit;
 
     lottery[] private lotteries;
-    mapping(address => Participant) private participants;
 
-    uint256 private currentLotteryId;
+    uint256 private s_currentLotteryId;
 
     /*//////////////////////////////////////////////////////////////
                             EVENTS
@@ -63,7 +63,7 @@ contract Airdrop is ReentrancyGuard {
     /*//////////////////////////////////////////////////////////////
                             ERRORS
     ///////////////////////////////////////////////////////////////*/
-    error AirDrop_WrongAmountOfETHSent(uint256 msgValue, uint256 entranceFee);
+    error AirDrop_WrongAmountOfETHSent(uint256 msgValue, uint256 i_entranceFee);
     error AirDrop_NotTheWinner();
     error AirDrop_NoActiveLottery();
 
@@ -72,10 +72,22 @@ contract Airdrop is ReentrancyGuard {
     ///////////////////////////////////////////////////////////////*/
 
     /*//////////////////////// CONSTRUCTOR ////////////////////////*/
-    constructor(uint256 _entranceFee, uint256 _amountOfParticipantsPerLottery) {
+    constructor(
+        uint256 _entranceFee, 
+        uint256 _amountOfParticipantsPerLottery, 
+        address _vrfCoordinator,
+        uint256 _subId,
+        bytes32 _keyHash,
+        uint32 _callbackGasLimit
+        ) 
+    VRFConsumerBaseV2Plus(_vrfCoordinator){
         //Ownable2Step(msg.sender)
-        entranceFee = _entranceFee;
-        amountOfParticipantsPerLottery = _amountOfParticipantsPerLottery;
+        i_entranceFee = _entranceFee;
+        i_amountOfParticipantsPerLottery = _amountOfParticipantsPerLottery;
+        i_subId = _subId;
+        i_keyHash = _keyHash;
+        i_callbackGasLimit = _callbackGasLimit;
+
     }
 
     /*///////////////////////// EXTERNAL //////////////////////////*/
@@ -86,42 +98,64 @@ contract Airdrop is ReentrancyGuard {
     //@note thing about the order and thing about the situations where time is out, when there is one or zero participants...
     function registerForAirdrop() external payable {
         if (
-            lotteries[currentLotteryId].time >= block.timestamp
-                && lotteries[currentLotteryId].state != State.Registration
+            lotteries[s_currentLotteryId].time >= block.timestamp
+                && lotteries[s_currentLotteryId].state != State.Registration
         ) {
             revert AirDrop_NoActiveLottery();
         }
 
-        if (msg.value != entranceFee) {
-            revert AirDrop_WrongAmountOfETHSent(msg.value, entranceFee);
+        if (msg.value != i_entranceFee) {
+            revert AirDrop_WrongAmountOfETHSent(msg.value, i_entranceFee);
         }
 
         if (
-            lotteries[currentLotteryId].time >= block.timestamp //&&
+            lotteries[s_currentLotteryId].time >= block.timestamp //&&
         ) {
-            lotteries[currentLotteryId].state = State.Waiting; //@note Im not sure if that state is needed. Maybe I should add "ToClaim" state
+            lotteries[s_currentLotteryId].state = State.Waiting; //@note Im not sure if that state is needed. Maybe I should add "ToClaim" state
 
             emit RaffleStarted(
-                lotteries[currentLotteryId].amountOfParticipants,
-                lotteries[currentLotteryId].amountOfTokens,
-                lotteries[currentLotteryId].changesToWinPerParticipant
+                lotteries[s_currentLotteryId].participants.length,
+                lotteries[s_currentLotteryId].amountOfTokens,
+                lotteries[s_currentLotteryId].changesToWinPerParticipant
             );
+
             startTheRaffle();
-            emit winnerSelected(lotteries[currentLotteryId].theWinner);
+            
+            emit winnerSelected(lotteries[s_currentLotteryId].theWinner);
+        
         } else {
-            lotteries[currentLotteryId].participants.push(
-                Participant({active: true, currentLotteryId: currentLotteryId, amountToClaim: 0})
+            lotteries[s_currentLotteryId].participants.push(
+                Participant({active:true,currentLotteryId: s_currentLotteryId, amountToClaim: 0})
             );
-            lotteries[currentLotteryId].amountOfParticipants++;
-            lotteries[currentLotteryId].amountOfTokens += msg.value;
-            lotteries[currentLotteryId].changesToWinPerParticipant = entranceFee / amountOfParticipantsPerLottery; //@note precission loss?
+            lotteries[s_currentLotteryId].amountOfTokens += msg.value;
+            lotteries[s_currentLotteryId].changesToWinPerParticipant = i_entranceFee / i_amountOfParticipantsPerLottery; //@note precission loss?
+            
             emit Registration(msg.sender);
         }
     }
 
+    function fulfillRandomWords(uint256 requestId, uint256[] calldata randomWords) internal override {
+    }
+    
+
     //@notice function that will be called by the owner to start the raffle
     //@note This needs to be called by the chainlink automatisation so not onlyOwner
-    function startTheRaffle() public {}
+    function startTheRaffle() public {
+
+
+        uint256 requestId = s_vrfCoordinator.requestRandomWords(
+            VRFV2PlusClient.RandomWordsRequest({
+                keyHash: i_keyHash,
+                subId: i_subId,
+                requestConfirmations: REQUEST_CONFIRMATIONS,
+                callbackGasLimit: i_callbackGasLimit,
+                numWords: NUM_WORDS,
+                extraArgs: VRFV2PlusClient._argsToBytes(
+                    VRFV2PlusClient.ExtraArgsV1({nativePayment: false})
+                )
+            }));
+
+    }
 
     function claimTheRewards(uint256 _lotteryId) public nonReentrant {
         if (msg.sender != lotteries[_lotteryId].theWinner) revert AirDrop_NotTheWinner();
@@ -153,6 +187,7 @@ contract Airdrop is ReentrancyGuard {
                     VRFV2PlusClient.ExtraArgsV1({nativePayment: false})
                 )
             })
+
 
     */
 
