@@ -73,21 +73,19 @@ contract Airdrop is VRFConsumerBaseV2Plus, ReentrancyGuard {
 
     /*//////////////////////// CONSTRUCTOR ////////////////////////*/
     constructor(
-        uint256 _entranceFee, 
-        uint256 _amountOfParticipantsPerLottery, 
+        uint256 _entranceFee,
+        uint256 _amountOfParticipantsPerLottery,
         address _vrfCoordinator,
         uint256 _subId,
         bytes32 _keyHash,
         uint32 _callbackGasLimit
-        ) 
-    VRFConsumerBaseV2Plus(_vrfCoordinator){
+    ) VRFConsumerBaseV2Plus(_vrfCoordinator) {
         //Ownable2Step(msg.sender)
         i_entranceFee = _entranceFee;
         i_amountOfParticipantsPerLottery = _amountOfParticipantsPerLottery;
         i_subId = _subId;
         i_keyHash = _keyHash;
         i_callbackGasLimit = _callbackGasLimit;
-
     }
 
     /*///////////////////////// EXTERNAL //////////////////////////*/
@@ -120,29 +118,24 @@ contract Airdrop is VRFConsumerBaseV2Plus, ReentrancyGuard {
             );
 
             startTheRaffle();
-            
+
             emit winnerSelected(lotteries[s_currentLotteryId].theWinner);
-        
         } else {
             lotteries[s_currentLotteryId].participants.push(
-                Participant({active:true,currentLotteryId: s_currentLotteryId, amountToClaim: 0})
+                Participant({active: true, currentLotteryId: s_currentLotteryId, amountToClaim: 0})
             );
             lotteries[s_currentLotteryId].amountOfTokens += msg.value;
             lotteries[s_currentLotteryId].changesToWinPerParticipant = i_entranceFee / i_amountOfParticipantsPerLottery; //@note precission loss?
-            
+
             emit Registration(msg.sender);
         }
     }
 
-    function fulfillRandomWords(uint256 requestId, uint256[] calldata randomWords) internal override {
-    }
-    
+    function fulfillRandomWords(uint256 requestId, uint256[] calldata randomWords) internal override {}
 
     //@notice function that will be called by the owner to start the raffle
     //@note This needs to be called by the chainlink automatisation so not onlyOwner
     function startTheRaffle() public {
-
-
         uint256 requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
                 keyHash: i_keyHash,
@@ -150,11 +143,9 @@ contract Airdrop is VRFConsumerBaseV2Plus, ReentrancyGuard {
                 requestConfirmations: REQUEST_CONFIRMATIONS,
                 callbackGasLimit: i_callbackGasLimit,
                 numWords: NUM_WORDS,
-                extraArgs: VRFV2PlusClient._argsToBytes(
-                    VRFV2PlusClient.ExtraArgsV1({nativePayment: false})
-                )
-            }));
-
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
+            })
+        );
     }
 
     function claimTheRewards(uint256 _lotteryId) public nonReentrant {
