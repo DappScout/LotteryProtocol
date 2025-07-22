@@ -1,5 +1,5 @@
 # Events
-[Git Source](https://github.com/DappScout/LotteryProtocol/blob/563327ba9d4382dac713cff99a3ce1ee38653fe5/src/libs/Events.sol)
+[Git Source](https://github.com/DappScout/LotteryProtocol/blob/6bebd34177e84edbb011f0bf5a23884b0693d678/src/libs/Events.sol)
 
 
 ## Events
