@@ -19,3 +19,7 @@ remappings = [
 ]
 gas_reports = ['*']
 verbosity = 2 
+
+[doc]
+out = "docs"
+repository = "https://github.com/DappScout/LotteryProtocol"
