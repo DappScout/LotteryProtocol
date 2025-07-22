@@ -1,5 +1,5 @@
 # Airdrop
-[Git Source](https://github.com/DappScout/LotteryProtocol/blob/6bebd34177e84edbb011f0bf5a23884b0693d678/src/AirdropContract.sol)
+[Git Source](https://github.com/DappScout/LotteryProtocol/blob/a7e28bf545dd695cbab49a48fd7a276f6cc42b8b/src/AirdropContract.sol)
 
 **Inherits:**
 VRFConsumerBaseV2Plus, ReentrancyGuard
