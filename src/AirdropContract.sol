@@ -7,7 +7,6 @@ import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/V
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-
 //@title Airdrop contract
 //@author DappScout
 //@notice This contract is a lottery contract that uses Chainlink VRF to select a winner
