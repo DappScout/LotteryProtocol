@@ -153,6 +153,8 @@ contract Airdrop is VRFConsumerBaseV2Plus, ReentrancyGuard {
         );
     }
 
+    //@notice function that will be called by the winner to claim the rewards
+    //@param _lotteryId the id of the lottery
     function claimTheRewards(uint256 _lotteryId) public nonReentrant {
         if (msg.sender != lotteries[_lotteryId].theWinner) revert AirDrop_NotTheWinner();
 

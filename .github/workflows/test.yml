@@ -41,3 +41,17 @@ jobs:
         run: |
           forge test -vvv
         id: test
+
+      - name: Generate documentation
+        run: |
+          forge doc
+        id: docs
+
+      - name: Commit documentation
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add docs/
+          git diff --staged --quiet || git commit -m "📚 Update documentation [skip ci]"
+          git push
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
