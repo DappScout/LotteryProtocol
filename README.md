@@ -92,6 +92,29 @@ cast call $CONTRACT_ADDRESS "isRegistered(address)" $YOUR_ADDRESS
 ```
 
  
+## 📚 Dependencies
+
+This project uses the following libraries:
+- Chainlink contracts for VRF (Verifiable Random Function) and Automation
+- OpenZeppelin contracts for security and utility functions
+- Forge Standard Library for testing
+
+### Installing Dependencies
+
+To install all required libraries with Foundry, run:
+
+```bash
+# Install all dependencies at once
+forge install
+
+# Or install each dependency individually
+forge install smartcontractkit/chainlink-brownie-contracts --no-commit
+forge install foundry-rs/forge-std --no-commit
+forge install OpenZeppelin/openzeppelin-contracts --no-commit
+```
+
+> Note: The `--no-commit` flag prevents Foundry from committing the changes to your repository.
+
 ## 🎯 Project Milestones
 
 ### Week 1: Foundation
