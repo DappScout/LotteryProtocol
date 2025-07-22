@@ -80,6 +80,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: generate-and-commit
     
+    environment:
+        name: github-pages
+        url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -136,6 +140,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v3
-        environment:
-          name: github-pages
-          url: ${{ steps.deployment.outputs.page_url }}
