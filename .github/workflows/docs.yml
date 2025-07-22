@@ -1,0 +1,70 @@
+name: Docs
+
+on:
+  push:
+    branches: ["main","feature/split-ci-workflows"]
+    paths:
+      - 'src/**'
+      - 'script/**'
+      - 'docs/**'
+      - 'foundry.toml'
+      - 'README.md'
+  workflow_dispatch:
+
+env:
+  FOUNDRY_PROFILE: ci
+
+permissions:
+  contents: write 
+  pull-requests: write
+
+
+jobs:
+  check:
+    name: Foundry project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Show Forge version
+        run: |
+          forge --version
+
+      - name: Install Dependencies
+        run: forge install
+
+      - name: Generate documentation
+        run: |
+          forge doc
+        id: docs
+
+      - name: Check for changes
+        id: git-check
+        run: |
+          git add docs/
+          if git diff --staged --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No documentation changes detected"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Documentation changes detected"
+          fi
+
+      - name: Commit documentation
+        if: steps.git-check.outputs.changed == 'true'
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -m "📚 Update documentation [skip ci]"
+
+      - name: Push changes
+        if: steps.git-check.outputs.changed == 'true'
+        uses: ad-m/github-push-action@v1.0.28
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
