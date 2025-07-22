@@ -1,5 +1,8 @@
 # [Plan] 🎯 Advanced Random Airdrop System with Chainlink VRF & Automation
 
+![Tests](https://github.com/DappScout/LotteryProtocol/actions/workflows/test.yml/badge.svg)
+![Documentation](https://github.com/DappScout/LotteryProtocol/actions/workflows/docs.yml/badge.svg)
+
 A comprehensive Solidity project that combines **Chainlink VRF** (Verifiable Random Function) and **Chainlink Automation** to create a fully automated, fair, and transparent airdrop distribution system.
 
 ## 🌟 What Makes This Project Special

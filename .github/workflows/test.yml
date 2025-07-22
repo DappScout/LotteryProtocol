@@ -1,9 +1,12 @@
-name: CI
+name: Tests
 
 on:
   push:
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 env:
   FOUNDRY_PROFILE: ci
@@ -24,7 +27,7 @@ jobs:
         run: |
           forge --version
 
-      - name: Install Dependencies # Install the dependencies
+      - name: Install Dependencies 
         run: forge install
 
       - name: Run Forge fmt
@@ -42,16 +45,9 @@ jobs:
           forge test -vvv
         id: test
 
-      - name: Generate documentation
-        run: |
-          forge doc
-        id: docs
+      - name: Run snapshot tests
+        run: forge snapshot
 
-      - name: Commit documentation
+      - name: Run coverage
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add docs/
-          git diff --staged --quiet || git commit -m "📚 Update documentation [skip ci]"
-          git push
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+          forge coverage --report summary
