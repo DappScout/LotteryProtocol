@@ -18,16 +18,20 @@ on:
 
 env:
   FOUNDRY_PROFILE: ci
-  MDBOOK_VERSION: '0.4.37'  # Pin version here for easy updates
+  MDBOOK_VERSION: '0.4.52'
 
 concurrency:
   group: "pages"
   cancel-in-progress: true
 
 jobs:
-  generate-and-commit:
-    name: Generate and Commit Docs
+  docs:
+    name: Generate and Deploy Docs
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,106 +41,45 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
-      - name: Show tool versions
-        run: |
-          echo "Forge version:"
-          forge --version
-
       - name: Install Dependencies
         run: forge install
 
       - name: Generate documentation
         run: forge doc
-        id: docs
 
-      - name: Check for changes
+      - name: Check for doc changes
         id: git-check
         run: |
           git add docs/
           if git diff --staged --quiet; then
             echo "changed=false" >> $GITHUB_OUTPUT
-            echo "No documentation changes detected"
           else
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "Documentation changes detected"
-          fi
-
-      - name: Commit documentation
-        if: steps.git-check.outputs.changed == 'true'
-        run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git commit -m "📚 Update documentation [skip ci]"
-
-      - name: Push changes
-        if: steps.git-check.outputs.changed == 'true'
-        uses: ad-m/github-push-action@v0.8.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
-
-  build-and-deploy:
-    name: Build and Deploy to GitHub Pages
-    runs-on: ubuntu-latest
-    needs: generate-and-commit
-    
-    environment:
-        name: github-pages
-        url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-
-      - name: Install Dependencies  
-        run: forge install
-
-      - name: Generate documentation (if needed)
-        run: |
-          if [ ! -d "docs/src" ]; then
-            echo "Docs not found, generating..."
-            forge doc
           fi
 
       - name: Setup mdBook
-        uses: peaceiris/actions-mdbook@v1
+        uses: peaceiris/actions-mdbook@v2
         with:
-          mdbook-version: ${{ env.MDBOOK_VERSION }}
-
-      - name: Verify mdBook version
-        run: |
-          INSTALLED_VERSION=$(mdbook --version | cut -d' ' -f2)
-          echo "Installed mdBook version: $INSTALLED_VERSION"
-          if [ "$INSTALLED_VERSION" != "v${{ env.MDBOOK_VERSION }}" ]; then
-            echo "ERROR: mdBook version mismatch!"
-            exit 1
-          fi
+          mdbook-version: '0.4.52'
 
       - name: Build documentation site
         run: |
           cd docs
-          mdbook build || {
-            echo "ERROR: mdBook build failed"
-            exit 1
-          }
-
-      - name: Validate build output
-        run: |
-          if [ ! -f "docs/book/index.html" ]; then
-            echo "ERROR: Build validation failed - no index.html found"
-            exit 1
-          fi
-          echo "Build validation passed ✓"
+          mdbook build
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4.6.2
+        uses: actions/upload-pages-artifact@v3.0.1
         with:
           path: ./docs/book
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4.0.5
+
+      - name: Commit documentation
+        if: steps.git-check.outputs.changed == 'true'
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -m "📚 Update documentation"
+          git push
