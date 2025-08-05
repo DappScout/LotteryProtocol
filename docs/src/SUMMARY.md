@@ -2,5 +2,6 @@
 - [Home](README.md)
 # src
   - [❱ libs](src/libs/README.md)
-    - [Events](src/libs/Events.sol/library.Events.md)
+    - [Errors](src/libs/ErrorsEvents.sol/interface.Errors.md)
+    - [Events](src/libs/ErrorsEvents.sol/interface.Events.md)
   - [Airdrop](src/AirdropContract.sol/contract.Airdrop.md)

@@ -1,8 +1,8 @@
 # Airdrop
-[Git Source](https://github.com/DappScout/LotteryProtocol/blob/9f80f4d4b35079a5dd151221169aa0fe62eebb1d/src/AirdropContract.sol)
+[Git Source](https://github.com/DappScout/LotteryProtocol/blob/ef3a689eff9cde4579c3b0e1febe5e031d9e2e5e/src/AirdropContract.sol)
 
 **Inherits:**
-VRFConsumerBaseV2Plus, ReentrancyGuard
+VRFConsumerBaseV2Plus, ReentrancyGuard, [Errors](/src/libs/ErrorsEvents.sol/interface.Errors.md), [Events](/src/libs/ErrorsEvents.sol/interface.Events.md)
 
 
 ## State Variables
@@ -110,70 +110,6 @@ function startTheRaffle() public;
 
 ```solidity
 function claimTheRewards(uint256 _lotteryId) public nonReentrant;
-```
-
-## Events
-### Registration
-Emitted when a user successfully registers for the current lottery
-
-
-```solidity
-event Registration(address indexed user);
-```
-
-**Parameters**
-
-|Name|Type|Description|
-|----|----|-----------|
-|`user`|`address`|The address of the user who registered for the airdrop|
-
-### RaffleStarted
-Emitted when a raffle is started and ready for winner selection
-
-
-```solidity
-event RaffleStarted(uint256 amountOfParticipants, uint256 amountOfTokens, uint256 changesToWinPerParticipant);
-```
-
-**Parameters**
-
-|Name|Type|Description|
-|----|----|-----------|
-|`amountOfParticipants`|`uint256`|The total number of participants in the lottery|
-|`amountOfTokens`|`uint256`|The total amount of ETH collected from all participants|
-|`changesToWinPerParticipant`|`uint256`|The calculated chances to win per participant (entrance fee divided by total participants)|
-
-### winnerSelected
-Emitted when a winner has been selected for the lottery
-
-
-```solidity
-event winnerSelected(address indexed winner);
-```
-
-**Parameters**
-
-|Name|Type|Description|
-|----|----|-----------|
-|`winner`|`address`|The address of the selected winner who can claim the prize|
-
-## Errors
-### AirDrop_WrongAmountOfETHSent
-
-```solidity
-error AirDrop_WrongAmountOfETHSent(uint256 msgValue, uint256 i_entranceFee);
-```
-
-### AirDrop_NotTheWinner
-
-```solidity
-error AirDrop_NotTheWinner();
-```
-
-### AirDrop_NoActiveLottery
-
-```solidity
-error AirDrop_NoActiveLottery();
 ```
 
 ## Structs

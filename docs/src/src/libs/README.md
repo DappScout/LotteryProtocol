@@ -1,4 +1,5 @@
 
 
 # Contents
-- [Events](Events.sol/library.Events.md)
+- [Errors](ErrorsEvents.sol/interface.Errors.md)
+- [Events](ErrorsEvents.sol/interface.Events.md)
