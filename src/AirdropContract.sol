@@ -6,13 +6,13 @@ import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFCo
 import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {Errors, Events} from "src/libs/Errors.sol";
+import {Errors, Events} from "src/libs/ErrorsEvents.sol";
 
 //@title Airdrop contract
 //@author DappScout
 //@notice This contract is a lottery contract that uses Chainlink VRF to select a winner
 //@dev This contract is a lottery contract that uses Chainlink VRF to select a winner
-contract Airdrop is VRFConsumerBaseV2Plus, ReentrancyGuard, Errors {
+contract Airdrop is VRFConsumerBaseV2Plus, ReentrancyGuard, Errors, Events {
     /*//////////////////////////////////////////////////////////////
                         TYPE DECLARATIONS
     ///////////////////////////////////////////////////////////////*/
