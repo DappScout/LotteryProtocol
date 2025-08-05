@@ -5,15 +5,7 @@ pragma solidity 0.8.30;
 import "forge-std/Test.sol";
 
 contract LotteryTest is Test {
-
     Airdrop public airdrop;
 
-
-
-    function setup() public {
-        
-    }
-
-
+    function setup() public {}
 }
-
