@@ -6,7 +6,7 @@ import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFCo
 import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {Errors} from "src/libs/Errors.sol";
+import {Errors, Events} from "src/libs/Errors.sol";
 
 //@title Airdrop contract
 //@author DappScout
@@ -57,20 +57,9 @@ contract Airdrop is VRFConsumerBaseV2Plus, ReentrancyGuard, Errors {
     /*//////////////////////////////////////////////////////////////
                             EVENTS
     ///////////////////////////////////////////////////////////////*/
-    /// @notice Emitted when a user successfully registers for the current lottery
-    /// @param user The address of the user who registered for the airdrop
-    event Registration(address indexed user);
-    
-    /// @notice Emitted when a raffle is started and ready for winner selection
-    /// @param amountOfParticipants The total number of participants in the lottery
-    /// @param amountOfTokens The total amount of ETH collected from all participants
-    /// @param changesToWinPerParticipant The calculated chances to win per participant (entrance fee divided by total participants)
-    event RaffleStarted(uint256 amountOfParticipants, uint256 amountOfTokens, uint256 changesToWinPerParticipant);
-    
-    /// @notice Emitted when a winner has been selected for the lottery
-    /// @param winner The address of the selected winner who can claim the prize
-    event winnerSelected(address indexed winner);
 
+    //imported from Events.sol
+    
     /*//////////////////////////////////////////////////////////////
                            MODIFIERS
     ///////////////////////////////////////////////////////////////*/
